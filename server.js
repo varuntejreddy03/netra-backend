@@ -2,11 +2,14 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const jwt = require("jsonwebtoken"); // ✅ Use standard JWT decoder
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
 
+const PORT = process.env.PORT || 3001;
+
+// 🔗 External APIs
 const LOGIN_URL = "https://kmce-api.teleuniv.in/auth/login";
 const ATTENDANCE_URL = "https://kmce-api.teleuniv.in/sanjaya/getAttendance";
 const SUBJECT_URL = "https://kmce-api.teleuniv.in/sanjaya/getSubjectAttendance";
@@ -15,13 +18,13 @@ app.get("/attendance", async (req, res) => {
   const { username, password } = req.query;
 
   if (!username) {
-    return res.status(400).json({ error: "Phone number (username) is required" });
+    return res.status(400).json({ error: "📞 Phone number (username) is required" });
   }
 
   const finalPassword = password && password.trim() !== "" ? password : "Kmce123$";
 
   try {
-    // 🔐 Step 1: Login
+    // 🔐 Login
     const loginRes = await axios.post(LOGIN_URL, {
       username,
       password: finalPassword,
@@ -31,14 +34,14 @@ app.get("/attendance", async (req, res) => {
     const token = loginRes.data?.access_token;
     if (!token) throw new Error("No token found in login response");
 
-    // ✅ Step 2: Decode token to extract student ID
+    // 🧠 Decode Token
     const decoded = jwt.decode(token);
     const studentId = decoded?.sub;
-    if (!studentId) throw new Error("Student ID (sub) not found in token");
+    if (!studentId) throw new Error("Student ID not found in token");
 
-    console.log("✅ Access Token decoded. Student ID:", studentId);
+    console.log("✅ Student ID from token:", studentId);
 
-    // 📦 Step 3: Fetch data from all APIs
+    // 📡 Fetch All Data in Parallel
     const [profileRes, attendanceRes, subjectRes] = await Promise.all([
       axios.get(`https://kmce-api.teleuniv.in/studentmaster/studentprofile/${studentId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -55,11 +58,9 @@ app.get("/attendance", async (req, res) => {
     const attendanceData = attendanceRes.data;
     const subjectData = subjectRes.data?.payload;
 
-    if (!profileData) {
-      throw new Error("Profile data missing or malformed");
-    }
+    if (!profileData) throw new Error("Student profile not found");
 
-    // ✅ Step 4: Send JSON to frontend
+    // 🚀 Return Combined Response
     res.json({
       profile: profileData,
       overall: attendanceData,
@@ -67,11 +68,11 @@ app.get("/attendance", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Backend error:", err.message);
+    console.error("❌ Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3001, () => {
-  console.log("🚀 Server running at http://localhost:3001");
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
