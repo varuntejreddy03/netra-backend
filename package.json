@@ -1,21 +1,20 @@
 {
-  "name": "allatend",
+  "name": "netra-backend",
   "version": "1.0.0",
+  "description": "Backend for Netra Attendance Dashboard",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["attendance", "backend", "netra", "nodejs", "express"],
+  "author": "Varuntej Reddy",
   "license": "ISC",
   "type": "commonjs",
-  "description": "",
   "dependencies": {
     "axios": "^1.11.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^3.1.2"
+    "jsonwebtoken": "^9.0.2"
   }
 }
